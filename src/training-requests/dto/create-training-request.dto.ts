@@ -2,7 +2,6 @@ import {
   IsInt,
   IsNotEmpty,
   IsString,
-  IsUUID,
   Min,
   MinLength,
 } from 'class-validator';
@@ -11,42 +10,36 @@ import { ApiProperty } from '@nestjs/swagger';
 
 export class CreateTrainingRequestDto {
   @ApiProperty({
-    example: 'd6665706-a011-4394-934b-f4c40f0011f5',
-    description: 'Id de la capacitación solicitada',
-  })
-  @IsNotEmpty({
-    message: 'La capacitación es obligatoria',
-  })
-  @IsUUID('4', {
-    message: 'El id de la capacitación no es válido',
-  })
-  trainingId!: string;
-
-  @ApiProperty({
     example: 15,
-    description: 'Número de personas a capacitar',
+    description:
+      'Número de personas a capacitar',
   })
   @IsNotEmpty({
-    message: 'La cantidad de participantes es obligatoria',
+    message:
+      'La cantidad de participantes es obligatoria',
   })
   @IsInt({
     message: 'Debe ser un número entero',
   })
   @Min(1, {
-    message: 'Debe haber al menos 1 participante',
+    message:
+      'Debe haber al menos 1 participante',
   })
   participantsCount!: number;
 
   @ApiProperty({
     example:
       'Lograr que el equipo de ventas domine las herramientas de cierre digital.',
-    description: 'Objetivos principales de la capacitación',
+    description:
+      'Objetivos principales de la capacitación',
   })
   @IsNotEmpty({
-    message: 'Los objetivos son obligatorios',
+    message:
+      'Los objetivos son obligatorios',
   })
   @IsString({
-    message: 'Los objetivos deben ser un texto',
+    message:
+      'Los objetivos deben ser un texto',
   })
   @MinLength(20, {
     message:
@@ -57,13 +50,16 @@ export class CreateTrainingRequestDto {
   @ApiProperty({
     example:
       'Empresa del sector retail con alta rotación de personal en el área comercial.',
-    description: 'Contexto o situación actual de la empresa',
+    description:
+      'Contexto o situación actual de la empresa',
   })
   @IsNotEmpty({
-    message: 'El contexto es obligatorio',
+    message:
+      'El contexto es obligatorio',
   })
   @IsString({
-    message: 'El contexto debe ser un texto',
+    message:
+      'El contexto debe ser un texto',
   })
   @MinLength(30, {
     message:

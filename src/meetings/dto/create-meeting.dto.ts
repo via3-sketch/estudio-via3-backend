@@ -1,19 +1,7 @@
-import {
-  IsDateString,
-  IsString,
-  IsUUID,
-} from 'class-validator';
-
 export class CreateMeetingDto {
-  @IsDateString()
-  date!: Date;
+    date!: Date
 
-  @IsString()
-  time!: string;
+    time!: string
 
-  @IsUUID()
-  targetUserId!: string;
-
-  @IsUUID()
-  trainingRequestId!: string;
+    targetUserId!: string
 }

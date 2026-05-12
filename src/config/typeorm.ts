@@ -17,7 +17,7 @@ export const typeormConfig: DataSourceOptions = {
 
   ssl: { rejectUnauthorized: false },
 
-  dropSchema: false,
+  dropSchema: true,
   synchronize: true,
 
   entities: ['dist/**/*.entity{.ts,.js}'],

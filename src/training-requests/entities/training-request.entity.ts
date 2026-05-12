@@ -4,16 +4,12 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
   CreateDateColumn,
-  UpdateDateColumn,
+  UpdateDateColumn
 } from 'typeorm';
-
 import { Expose } from 'class-transformer';
-
 import { Users } from '../../users/entities/user.entity';
-
 import { RequestStatus } from '../enums/requests-status.enum';
-
-import { Training } from '../../training/entities/training.entity';
+//import { Trainings } from './training.entity';
 
 @Entity({
   name: 'TRAINING_REQUESTS',
@@ -39,7 +35,7 @@ export class TrainingRequests {
   @Column({
     type: 'enum',
     enum: RequestStatus,
-    default: RequestStatus.PENDING,
+    default: RequestStatus.PENDING
   })
   status!: RequestStatus;
 
@@ -52,9 +48,8 @@ export class TrainingRequests {
   @ManyToOne(() => Users)
   user!: Users;
 
-  @Expose({ groups: ['Get'] })
-  @ManyToOne(() => Training, {
-    eager: true,
-  })
-  training!: Training;
+  /*@ManyToOne(() => Trainings, (training) => training.requests)
+  training!: Trainings;*/
+
+
 }

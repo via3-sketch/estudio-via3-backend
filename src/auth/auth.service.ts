@@ -24,9 +24,6 @@ export class AuthService {
     @InjectRepository(Users)
     private readonly usersRepository: Repository<Users>,
 
-    @InjectRepository(PasswordResetToken)
-    private readonly resetRepository: Repository<PasswordResetToken>,
-
     private readonly jwtService: JwtService,
 
     private readonly emailService: EmailService,
@@ -70,10 +67,7 @@ export class AuthService {
     const savedUser = await this.usersRepository.save(newUser);
 
     try {
-      // await this.emailService.sendWelcomeEmail(
-      //   savedUser.email,
-      //   savedUser.name,
-      // );
+      await this.emailService.sendWelcomeEmail(savedUser.email, savedUser.name);
 
       console.log('WELCOME EMAIL ENVIADO');
     } catch (error) {
@@ -138,95 +132,6 @@ export class AuthService {
     };
   }
 
-  // RECUPERAR CONTRASEÑA
-
-  async forgotPassword(email: string) {
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await this.usersRepository.findOneBy({
-      email: normalizedEmail,
-    });
-
-    // NO REVELAR SI EXISTE
-
-    if (!user) {
-      return {
-        success: true,
-        message: 'Si el correo existe, enviaremos instrucciones.',
-      };
-    }
-
-    // CUENTA GOOGLE
-
-    if (user.googleId) {
-      throw new BadRequestException(
-        'Esta cuenta fue registrada con Google. Continúa con Google.',
-      );
-    }
-
-    // LINK SIMPLE
-    // SIN TOKEN
-
-    const resetLink = `${
-      process.env.FRONTEND_URL || 'http://localhost:3000'
-    }/reset-password?email=${user.email}`;
-
-    try {
-      await this.emailService.sendPasswordRecoveryEmail(
-        user.email,
-        user.name,
-        resetLink,
-      );
-
-      console.log('RESET PASSWORD EMAIL ENVIADO:', user.email);
-    } catch (error) {
-      console.error('ERROR RESET PASSWORD EMAIL:', error);
-
-      throw new BadRequestException(
-        'No pudimos enviar el correo de recuperación.',
-      );
-    }
-
-    return {
-      success: true,
-      message: 'Correo de recuperación enviado.',
-    };
-  }
-
-  // NUEVO
-  // RESET PASSWORD
-
-  async resetPassword(email: string, password: string) {
-    const normalizedEmail = email.toLowerCase().trim();
-
-    const user = await this.usersRepository
-      .createQueryBuilder('user')
-      .addSelect('user.password')
-      .where('user.email = :email', {
-        email: normalizedEmail,
-      })
-      .getOne();
-
-    if (!user) {
-      throw new BadRequestException('Usuario no encontrado.');
-    }
-
-    if (user.googleId) {
-      throw new BadRequestException('Esta cuenta fue registrada con Google.');
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    user.password = hashedPassword;
-
-    await this.usersRepository.save(user);
-
-    return {
-      success: true,
-      message: 'Contraseña actualizada correctamente.',
-    };
-  }
-
   async findOrCreateGoogleUser(
     googleUser: {
       email: string;
@@ -248,18 +153,12 @@ export class AuthService {
       email: normalizedEmail,
     });
 
-    // USUARIO EXISTE
-
     if (user) {
-      // CUENTA MANUAL
-
       if (!user.googleId) {
         throw new BadRequestException(
           'Este correo ya está registrado con email y contraseña.',
         );
       }
-
-      // GOOGLE ID DISTINTO
 
       if (user.googleId !== googleUser.googleId) {
         throw new BadRequestException(
@@ -267,23 +166,17 @@ export class AuthService {
         );
       }
 
-      // SIGNUP SOBRE CUENTA EXISTENTE
-
       if (mode === 'signup') {
         throw new BadRequestException(
           'Esta cuenta Google ya existe. Inicia sesión.',
         );
       }
     } else {
-      // SIGNIN SIN CUENTA
-
       if (mode === 'signin') {
         throw new BadRequestException(
           'No existe una cuenta registrada con Google para este correo.',
         );
       }
-
-      // CREAR SOLO SI NO EXISTE
 
       user = this.usersRepository.create({
         email: normalizedEmail,

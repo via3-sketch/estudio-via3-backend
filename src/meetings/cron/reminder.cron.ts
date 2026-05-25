@@ -1,8 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { Cron, CronExpression } from '@nestjs/schedule';
+
+import { Cron } from '@nestjs/schedule';
+
 import { InjectRepository } from '@nestjs/typeorm';
+
 import { Repository } from 'typeorm';
+
 import { Meetings } from '../entities/meeting.entity';
+
 import { EmailService } from 'src/notifications/channels/email/email.service';
 
 @Injectable()
@@ -12,26 +17,31 @@ export class MeetingRemindersService {
   constructor(
     @InjectRepository(Meetings)
     private readonly meetingsRepository: Repository<Meetings>,
+
     private readonly emailService: EmailService,
   ) {}
 
-  @Cron(CronExpression.EVERY_HOUR)
+  @Cron('*/10 * * * *')
   async sendReminders() {
     this.logger.log('Chequeando recordatorios de reuniones...');
 
     await this.checkReminders24h();
+
     await this.checkReminders2h();
   }
 
   async checkReminders24h() {
     const now = new Date();
+
     const from = new Date(now.getTime() + 23 * 60 * 60 * 1000);
+
     const to = new Date(now.getTime() + 25 * 60 * 60 * 1000);
 
     const meetings = await this.meetingsRepository.find({
       where: {
         reminder24hSent: false,
       },
+
       relations: ['user', 'trainingRequest'],
     });
 
@@ -40,6 +50,7 @@ export class MeetingRemindersService {
 
       if (meetingDateTime >= from && meetingDateTime <= to) {
         const email = meeting.user?.email;
+
         const companyName =
           meeting.user?.companyName || meeting.user?.name || 'Cliente';
 
@@ -48,12 +59,13 @@ export class MeetingRemindersService {
         if (email) {
           await this.emailService.sendMeetingReminder24h(
             email,
+
             companyName,
-            startTime.toLocaleDateString('es-AR'),
-            startTime.toLocaleTimeString('es-AR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
+
+            String(meeting.startTime),
+
+            meeting.startTime.toISOString().split('T')[1],
+
             meeting.meetLink,
           );
 
@@ -69,13 +81,16 @@ export class MeetingRemindersService {
 
   private async checkReminders2h() {
     const now = new Date();
+
     const from = new Date(now.getTime() + 1 * 60 * 60 * 1000);
+
     const to = new Date(now.getTime() + 3 * 60 * 60 * 1000);
 
     const meetings = await this.meetingsRepository.find({
       where: {
         reminder2hSent: false,
       },
+
       relations: ['user', 'trainingRequest'],
     });
 
@@ -84,6 +99,7 @@ export class MeetingRemindersService {
 
       if (meetingDateTime >= from && meetingDateTime <= to) {
         const email = meeting.user?.email;
+
         const companyName =
           meeting.user?.companyName || meeting.user?.name || 'Cliente';
 
@@ -92,13 +108,14 @@ export class MeetingRemindersService {
         if (email) {
           await this.emailService.sendMeetingReminder2h(
             email,
+
             companyName,
-            startTime.toLocaleDateString('es-AR'),
-            startTime.toLocaleTimeString('es-AR', {
-              hour: '2-digit',
-              minute: '2-digit',
-            }),
-            meeting.meetLink ?? '',
+
+            String(meeting.startTime),
+
+            meeting.startTime.toISOString().split('T')[1],
+
+            meeting.meetLink,
           );
 
           await this.meetingsRepository.update(meeting.id, {
@@ -112,6 +129,23 @@ export class MeetingRemindersService {
   }
 
   private getMeetingDateTime(meeting: Meetings): Date {
-    return new Date(meeting.startTime);
+    const [hours, minutes] = meeting.startTime
+      .toISOString()
+      .split('T')[1]
+      .split(':')
+      .map(Number);
+
+    const dateStr = String(meeting.startTime.toISOString().split('T')[0]);
+
+    const [year, month, day] = dateStr.split('-').map(Number);
+
+    const date = new Date(year, month - 1, day, hours, minutes, 0, 0);
+
+    return date;
+  }
+
+  @Cron('*/5 * * * *')
+  async handleCron() {
+    console.log('Checking reminders...');
   }
 }

@@ -1,25 +1,54 @@
 import { Injectable } from '@nestjs/common';
+
 import { ConfigService } from '@nestjs/config';
+
 import { google } from 'googleapis';
 
 @Injectable()
 export class GoogleMeetService {
+
   private oauth2Client;
 
   constructor(
-    private readonly configService: ConfigService,
+    private readonly configService:
+      ConfigService,
   ) {
-    this.oauth2Client = new google.auth.OAuth2(
+
+    console.log(
+      'GOOGLE_MEET_CLIENT_ID:',
       this.configService.get<string>(
         'GOOGLE_MEET_CLIENT_ID',
       ),
+    );
 
+    console.log(
+      'GOOGLE_MEET_CLIENT_SECRET:',
       this.configService.get<string>(
         'GOOGLE_MEET_CLIENT_SECRET',
-      ),
-
-      'http://localhost',
+      )
+        ? 'CARGADO'
+        : 'NO CARGADO',
     );
+
+    console.log(
+      'GOOGLE_MEET_REFRESH_TOKEN:',
+      this.configService.get<string>(
+        'GOOGLE_MEET_REFRESH_TOKEN',
+      ),
+    );
+
+    this.oauth2Client =
+      new google.auth.OAuth2(
+        this.configService.get<string>(
+          'GOOGLE_MEET_CLIENT_ID',
+        ),
+
+        this.configService.get<string>(
+          'GOOGLE_MEET_CLIENT_SECRET',
+        ),
+
+        'https://developers.google.com/oauthplayground',
+      );
 
     this.oauth2Client.setCredentials({
       refresh_token:
@@ -27,97 +56,212 @@ export class GoogleMeetService {
           'GOOGLE_MEET_REFRESH_TOKEN',
         ),
     });
+
+    console.log(
+      'GOOGLE OAUTH CLIENT CONFIGURADO',
+    );
   }
 
-  async createEvent(data: {
-    start: Date;
-    end: Date;
-    email: string;
-    name: string;
-  }) {
-    const calendar = google.calendar({
-      version: 'v3',
-      auth: this.oauth2Client,
-    });
+  async createEvent(
+    data: {
+      start: Date;
+      end: Date;
+      email: string;
+      name: string;
+    },
+  ) {
 
-    const response =
-      await calendar.events.insert({
-        calendarId: 'primary',
+    console.log(
+      '==============================',
+    );
 
-        conferenceDataVersion: 1,
+    console.log(
+      'INICIANDO CREACION GOOGLE MEET',
+    );
 
-        sendUpdates: 'all',
+    console.log(
+      'DATA RECIBIDA:',
+      data,
+    );
 
-        requestBody: {
-          summary: 'Scheduled Meeting',
+    const calendar =
+      google.calendar({
+        version: 'v3',
 
-          description:
-            'Meeting created automatically from the platform.',
+        auth:
+          this.oauth2Client,
+      });
 
-          start: {
-            dateTime:
-              data.start.toISOString(),
+    console.log(
+      'CLIENTE CALENDAR CREADO',
+    );
 
-            timeZone:
-              'America/Bogota',
-          },
+    try {
 
-          end: {
-            dateTime:
-              data.end.toISOString(),
+      console.log(
+        'ENVIANDO REQUEST A GOOGLE...',
+      );
 
-            timeZone:
-              'America/Bogota',
-          },
+      const response =
+        await calendar.events.insert({
+          calendarId:
+            'primary',
 
-          attendees: [
-            {
-              email: data.email,
-              displayName: data.name,
+          conferenceDataVersion: 1,
+
+          sendUpdates: 'all',
+
+          requestBody: {
+            summary:
+              'Reunión ViaCore',
+
+            description:
+              'Reunión agendada automáticamente desde ViaCore.',
+
+            start: {
+              dateTime:
+                data.start.toISOString(),
+
+              timeZone:
+                'America/Argentina/Buenos_Aires',
             },
-          ],
 
-          conferenceData: {
-            createRequest: {
-              requestId: `meet-${Date.now()}`,
+            end: {
+              dateTime:
+                data.end.toISOString(),
 
-              conferenceSolutionKey: {
-                type:
-                  'hangoutsMeet',
+              timeZone:
+                'America/Argentina/Buenos_Aires',
+            },
+
+            attendees: [
+              {
+                email:
+                  data.email,
+
+                displayName:
+                  data.name,
+              },
+            ],
+
+            conferenceData: {
+              createRequest: {
+                requestId:
+                  `meet-${Date.now()}`,
+
+                conferenceSolutionKey: {
+                  type:
+                    'hangoutsMeet',
+                },
               },
             },
           },
-        },
-      });
+        });
 
-    const meetLink =
-      response.data.conferenceData?.entryPoints?.find(
-        (entry) =>
-          entry.entryPointType ===
-          'video',
-      )?.uri || '';
+      console.log(
+        'EVENTO GOOGLE CREADO EXITOSAMENTE',
+      );
 
-    return {
-      meetLink,
+      console.log(
+        'RESPONSE:',
+        response.data,
+      );
 
-      googleEventId:
-        response.data.id || '',
-    };
+      const meetLink =
+        response.data
+          .conferenceData
+          ?.entryPoints
+          ?.find(
+            (entry) =>
+              entry.entryPointType ===
+              'video',
+          )?.uri || '';
+
+      console.log(
+        'MEET LINK:',
+        meetLink,
+      );
+
+      console.log(
+        'GOOGLE EVENT ID:',
+        response.data.id,
+      );
+
+      return {
+        meetLink,
+
+        googleEventId:
+          response.data.id || '',
+      };
+
+    } catch (error) {
+
+      console.log(
+        '==============================',
+      );
+
+      console.log(
+        'ERROR CREANDO GOOGLE MEET',
+      );
+
+      console.log(
+        'ERROR COMPLETO:',
+        error,
+      );
+
+      console.log(
+        'ERROR RESPONSE:',
+        error?.response?.data,
+      );
+
+      console.log(
+        'ERROR MESSAGE:',
+        error?.message,
+      );
+
+      console.log(
+        'ERROR STACK:',
+        error?.stack,
+      );
+
+      console.log(
+        '==============================',
+      );
+
+      throw error;
+    }
   }
 
   async deleteEvent(
     eventId: string,
   ) {
-    const calendar = google.calendar({
-      version: 'v3',
-      auth: this.oauth2Client,
-    });
+
+    console.log(
+      'ELIMINANDO EVENTO:',
+      eventId,
+    );
+
+    const calendar =
+      google.calendar({
+        version: 'v3',
+
+        auth:
+          this.oauth2Client,
+      });
 
     await calendar.events.delete({
-      calendarId: 'primary',
+      calendarId:
+        'primary',
+
       eventId,
-      sendUpdates: 'all',
+
+      sendUpdates:
+        'all',
     });
+
+    console.log(
+      'EVENTO ELIMINADO',
+    );
 
     return {
       deleted: true,
@@ -126,20 +270,33 @@ export class GoogleMeetService {
 
   async updateEvent(
     eventId: string,
+
     start: Date,
+
     end: Date,
   ) {
-    const calendar = google.calendar({
-      version: 'v3',
-      auth: this.oauth2Client,
-    });
+
+    console.log(
+      'ACTUALIZANDO EVENTO:',
+      eventId,
+    );
+
+    const calendar =
+      google.calendar({
+        version: 'v3',
+
+        auth:
+          this.oauth2Client,
+      });
 
     await calendar.events.patch({
-      calendarId: 'primary',
+      calendarId:
+        'primary',
 
       eventId,
 
-      sendUpdates: 'all',
+      sendUpdates:
+        'all',
 
       requestBody: {
         start: {
@@ -147,7 +304,7 @@ export class GoogleMeetService {
             start.toISOString(),
 
           timeZone:
-            'America/Bogota',
+            'America/Argentina/Buenos_Aires',
         },
 
         end: {
@@ -155,10 +312,14 @@ export class GoogleMeetService {
             end.toISOString(),
 
           timeZone:
-            'America/Bogota',
+            'America/Argentina/Buenos_Aires',
         },
       },
     });
+
+    console.log(
+      'EVENTO ACTUALIZADO',
+    );
 
     return {
       updated: true,

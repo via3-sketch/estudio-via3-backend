@@ -18,6 +18,8 @@ import { EmailModule } from 'src/notifications/channels/email/email.module';
 
 import { PasswordResetToken } from './entities/password-reset-token.entity';
 
+import { ForgotPasswordService } from './forgot-password/forgot-password.service';
+
 @Module({
   imports: [
     TypeOrmModule.forFeature([
@@ -32,10 +34,10 @@ import { PasswordResetToken } from './entities/password-reset-token.entity';
 
   providers: [
     AuthService,
+    ForgotPasswordService,
     AuthGuard,
     GoogleAuthGuard,
     GoogleStrategy,
   ],
 })
 export class AuthModule {}
-

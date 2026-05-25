@@ -19,16 +19,25 @@ import { AuthGuard } from './guards/auth.guard';
 
 import { AuthService } from './auth.service';
 
+import { ForgotPasswordService } from './forgot-password/forgot-password.service';
+
 import { CreateUserDto, LoginUserDto } from 'src/users/dto/create-user.dto';
 
+import {
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './forgot-password/forgot-password.dto';
+
 import { ApiTags } from '@nestjs/swagger';
+
+const isProduction = process.env.NODE_ENV === 'production';
 
 const cookieConfig = {
   httpOnly: true,
 
-  secure: false,
+  secure: isProduction,
 
-  sameSite: 'lax' as const,
+  sameSite: (isProduction ? 'none' : 'lax') as 'none' | 'lax',
 
   maxAge: 1000 * 60 * 60,
 
@@ -39,7 +48,11 @@ const cookieConfig = {
 @ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
-  constructor(private readonly authService: AuthService) {}
+  constructor(
+    private readonly authService: AuthService,
+
+    private readonly forgotPasswordService: ForgotPasswordService,
+  ) {}
 
   @Get('google')
   @UseGuards(GoogleAuthGuard)
@@ -116,6 +129,29 @@ export class AuthController {
     };
   }
 
+  // RECUPERAR CONTRASEÑA
+
+  @Post('forgot-password')
+  async forgotPassword(
+    @Body()
+    dto: ForgotPasswordDto,
+  ) {
+    return await this.forgotPasswordService.forgotPassword(dto.email);
+  }
+
+  // RESET PASSWORD
+
+  @Post('reset-password')
+  async resetPassword(
+    @Body()
+    dto: ResetPasswordDto,
+  ) {
+    return await this.forgotPasswordService.resetPassword(
+      dto.token,
+      dto.password,
+    );
+  }
+
   @Post('logout')
   logout(
     @Res({ passthrough: true })
@@ -128,16 +164,6 @@ export class AuthController {
     return {
       logout: true,
     };
-  }
-
-  @Post('forgot-password')
-  forgotPassword(@Body() body: { email: string }) {
-    return this.authService.forgotPassword(body.email);
-  }
-
-  @Post('reset-password')
-  resetPassword(@Body() body: { email: string; password: string }) {
-    return this.authService.resetPassword(body.email, body.password);
   }
 
   @Get('profile')

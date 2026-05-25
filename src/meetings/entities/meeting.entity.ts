@@ -46,7 +46,7 @@ export class Meetings {
   @Column({
     type: 'enum',
     enum: MeetingStatus,
-    enumName: 'MeetingStatus',
+    enumName: 'meeting_status_enum',
     default: MeetingStatus.PENDING,
   })
   status!: MeetingStatus;
@@ -59,7 +59,7 @@ export class Meetings {
   @CreateDateColumn()
   createdAt!: Date;
 
-  @ManyToOne(() => Users, {
+  @ManyToOne(() => Users, (user) => user.meetings, {
     nullable: false,
     onDelete: 'CASCADE',
   })

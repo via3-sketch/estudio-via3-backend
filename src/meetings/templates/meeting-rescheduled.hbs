@@ -1,0 +1,313 @@
+<div style="margin:0; padding:0; background-color:#0d0d0d; font-family:Arial, Helvetica, sans-serif; width:100%;">
+
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="padding:40px 0; background-color:#0d0d0d;">
+    <tr>
+      <td align="center">
+
+        <table
+          width="650"
+          cellpadding="0"
+          cellspacing="0"
+          border="0"
+          style="
+            background-color:#111111;
+            border-radius:22px;
+            overflow:hidden;
+            border:1px solid #2a2a2a;
+            box-shadow:0 0 30px rgba(0,0,0,.35);
+          "
+        >
+
+          <tr>
+            <td>
+              <img
+                src="https://res.cloudinary.com/dmwy7wbh7/image/upload/q_auto/f_auto/v1778841139/Email.Via3_qnmftt.png"
+                alt="ViaCore"
+                width="650"
+                style="display:block; width:100%; max-width:650px;"
+              />
+            </td>
+          </tr>
+
+          <tr>
+            <td style="padding:55px 48px;">
+
+              <p style="
+                margin:0 0 15px 0;
+                color:#d4a64f;
+                font-size:13px;
+                font-weight:700;
+                letter-spacing:1.8px;
+                text-transform:uppercase;
+              ">
+                Reagendamiento confirmado
+              </p>
+
+              <h1 style="
+                color:#ffffff;
+                font-size:34px;
+                line-height:42px;
+                margin:0 0 22px 0;
+                font-weight:700;
+              ">
+                Tu reunión fue reagendada exitosamente
+              </h1>
+
+              <p style="
+                color:#cfcfcf;
+                font-size:16px;
+                line-height:30px;
+                margin:0 0 35px 0;
+              ">
+                Hola <strong style="color:#ffffff;">{{participantName}}</strong>,
+                la programación de tu reunión fue actualizada correctamente.
+                Aquí podrás visualizar los cambios realizados.
+              </p>
+
+              <table
+                width="100%"
+                cellpadding="0"
+                cellspacing="0"
+                border="0"
+                style="
+                  background-color:#181818;
+                  border:1px solid #2c2c2c;
+                  border-radius:16px;
+                  margin-bottom:30px;
+                "
+              >
+
+                <tr>
+                  <td style="padding:30px;">
+
+                    <p style="
+                      margin:0 0 25px 0;
+                      color:#ffffff;
+                      font-size:20px;
+                      font-weight:700;
+                    ">
+                      Comparación de horarios
+                    </p>
+
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+
+                      <tr>
+
+                        <td
+                          width="48%"
+                          valign="top"
+                          style="
+                            background-color:#141414;
+                            border:1px solid #262626;
+                            border-radius:14px;
+                            padding:22px;
+                          "
+                        >
+
+                          <p style="
+                            margin:0 0 18px 0;
+                            color:#8f8f8f;
+                            font-size:12px;
+                            text-transform:uppercase;
+                            letter-spacing:1.5px;
+                            font-weight:700;
+                          ">
+                            Programación anterior
+                          </p>
+
+                          <p style="
+                            margin:0 0 14px 0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Día:</strong><br>
+                            {{previousDay}}
+                          </p>
+
+                          <p style="
+                            margin:0 0 14px 0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Fecha:</strong><br>
+                            {{previousDate}}
+                          </p>
+
+                          <p style="
+                            margin:0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Hora:</strong><br>
+                            {{previousTime}}
+                          </p>
+
+                        </td>
+
+                        <td width="4%"></td>
+
+                        <td
+                          width="48%"
+                          valign="top"
+                          style="
+                            background-color:#1a1710;
+                            border:1px solid rgba(212,166,79,.25);
+                            border-radius:14px;
+                            padding:22px;
+                          "
+                        >
+
+                          <p style="
+                            margin:0 0 18px 0;
+                            color:#d4a64f;
+                            font-size:12px;
+                            text-transform:uppercase;
+                            letter-spacing:1.5px;
+                            font-weight:700;
+                          ">
+                            Nueva programación
+                          </p>
+
+                          <p style="
+                            margin:0 0 14px 0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Día:</strong><br>
+                            {{newDay}}
+                          </p>
+
+                          <p style="
+                            margin:0 0 14px 0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Fecha:</strong><br>
+                            {{newDate}}
+                          </p>
+
+                          <p style="
+                            margin:0;
+                            color:#ffffff;
+                            font-size:15px;
+                            line-height:28px;
+                          ">
+                            <strong>Hora:</strong><br>
+                            {{newTime}}
+                          </p>
+
+                        </td>
+
+                      </tr>
+
+                    </table>
+
+                    <div style="
+                      margin-top:28px;
+                      padding-top:25px;
+                      border-top:1px solid #2a2a2a;
+                    ">
+
+                      <p style="
+                        margin:0 0 10px 0;
+                        color:#8f8f8f;
+                        font-size:13px;
+                        text-transform:uppercase;
+                        letter-spacing:1px;
+                      ">
+                        Google Meet
+                      </p>
+
+                      <a
+                        href="{{meetLink}}"
+                        style="
+                          color:#d4a64f;
+                          text-decoration:none;
+                          font-size:15px;
+                          line-height:28px;
+                          word-break:break-all;
+                        "
+                      >
+                        {{meetLink}}
+                      </a>
+
+                    </div>
+
+                  </td>
+                </tr>
+
+              </table>
+
+              <table cellpadding="0" cellspacing="0" border="0" style="margin-bottom:30px;">
+                <tr>
+                  <td
+                    align="center"
+                    bgcolor="#d4a64f"
+                    style="border-radius:10px;"
+                  >
+                    <a
+                      href="{{meetLink}}"
+                      style="
+                        display:inline-block;
+                        padding:16px 38px;
+                        color:#111111;
+                        text-decoration:none;
+                        font-size:15px;
+                        font-weight:700;
+                      "
+                    >
+                      VER REUNIÓN
+                    </a>
+                  </td>
+                </tr>
+              </table>
+
+              <div style="
+                background-color:#141414;
+                border-radius:14px;
+                padding:22px;
+                border:1px solid #232323;
+              ">
+                <p style="
+                  margin:0;
+                  color:#a5a5a5;
+                  font-size:14px;
+                  line-height:28px;
+                ">
+                  Te recomendamos verificar la nueva programación y conectarte unos minutos antes del inicio de la sesión.
+                </p>
+              </div>
+
+            </td>
+          </tr>
+
+          <tr>
+            <td style="
+              padding:28px;
+              text-align:center;
+              background-color:#0a0a0a;
+              border-top:1px solid #1f1f1f;
+            ">
+              <p style="
+                margin:0;
+                color:#6f6f6f;
+                font-size:13px;
+                line-height:24px;
+              ">
+                © {{year}} ViaCore · Todos los derechos reservados.
+              </p>
+            </td>
+          </tr>
+
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</div>

@@ -25,9 +25,6 @@ export const generateDaySlots = (
   const offsetMs = localDate.getTime() - tzDate.getTime();
   const current = new Date(localDate.getTime() + offsetMs);
 
-  const offsetMs = naiveDate.getTime() - utcEquivalent;
-  const current = new Date(naiveDate.getTime() + offsetMs);
-
   while (true) {
     const start = new Date(current);
     const end = addMinutesToDate(start, MEETING_DURATION);

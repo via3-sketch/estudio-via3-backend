@@ -14,7 +14,7 @@ export class AvailabilityService {
   ) {}
 
   async getAvailability(date: string, timezone: string) {
-    const targetDate = new Date(`${date}T00:00:00`);
+    const targetDate = new Date(`${date}T12:00:00.000Z`);
 
     const todayInTz = new Date(
       new Date().toLocaleString('en-CA', { timeZone: timezone }),
@@ -22,7 +22,9 @@ export class AvailabilityService {
     todayInTz.setHours(0, 0, 0, 0);
 
     const selectedInTz = new Date(
-      new Date(`${date}T00:00:00`).toLocaleString('en-CA', { timeZone: timezone }),
+      new Date(`${date}T00:00:00`).toLocaleString('en-CA', {
+        timeZone: timezone,
+      }),
     );
     selectedInTz.setHours(0, 0, 0, 0);
 
@@ -35,7 +37,13 @@ export class AvailabilityService {
       weekday: 'short',
     });
     const days: Record<string, number> = {
-      Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6,
+      Sun: 0,
+      Mon: 1,
+      Tue: 2,
+      Wed: 3,
+      Thu: 4,
+      Fri: 5,
+      Sat: 6,
     };
     const day = days[dayFormatter.format(targetDate)] ?? targetDate.getDay();
 

@@ -247,6 +247,13 @@ export class MeetingsService {
 
     meeting.status = MeetingStatus.CANCELLED;
 
+    if (meeting.trainingRequest?.id && meeting.user?.id) {
+      this.notificationsGateway.emitNotificationToUser(meeting.user.id, {
+        type: 'meeting_cancelled',
+        requestId: meeting.trainingRequest.id,
+      });
+    }
+
     return await this.meetingRepository.save(meeting);
   }
 

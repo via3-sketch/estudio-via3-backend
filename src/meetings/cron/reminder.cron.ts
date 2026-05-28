@@ -12,12 +12,15 @@ import {
 } from '@nestjs/typeorm';
 
 import {
+  Not,
   Repository,
 } from 'typeorm';
 
 import { Meetings } from '../entities/meeting.entity';
 
 import { EmailService } from 'src/notifications/channels/email/email.service';
+
+import { MeetingStatus } from '../entities/meetingStatus.entity';
 
 @Injectable()
 export class MeetingRemindersService {
@@ -38,7 +41,6 @@ export class MeetingRemindersService {
   ) {}
 
   @Cron('*/10 * * * *')
-
   async sendReminders() {
 
     this.logger.log(
@@ -72,6 +74,11 @@ export class MeetingRemindersService {
         where: {
           reminder24hSent:
             false,
+
+          status:
+            Not(
+              MeetingStatus.CANCELLED,
+            ),
         },
 
         relations: [
@@ -169,6 +176,11 @@ export class MeetingRemindersService {
         where: {
           reminder2hSent:
             false,
+
+          status:
+            Not(
+              MeetingStatus.CANCELLED,
+            ),
         },
 
         relations: [
@@ -248,18 +260,24 @@ export class MeetingRemindersService {
     meetingDate: Date,
   ) {
 
+    const timezone =
+      'America/Argentina/Buenos_Aires';
+
     const day =
       meetingDate.toLocaleDateString(
-        'es-CO',
+        'es-AR',
         {
           weekday:
             'long',
+
+          timeZone:
+            timezone,
         },
       );
 
     const date =
       meetingDate.toLocaleDateString(
-        'es-CO',
+        'es-AR',
         {
           year:
             'numeric',
@@ -269,12 +287,15 @@ export class MeetingRemindersService {
 
           day:
             'numeric',
+
+          timeZone:
+            timezone,
         },
       );
 
     const time =
       meetingDate.toLocaleTimeString(
-        'es-CO',
+        'es-AR',
         {
           hour:
             '2-digit',
@@ -284,6 +305,9 @@ export class MeetingRemindersService {
 
           hour12:
             true,
+
+          timeZone:
+            timezone,
         },
       );
 
@@ -303,51 +327,15 @@ export class MeetingRemindersService {
     meeting: Meetings,
   ): Date {
 
-    const [
-      hours,
-      minutes,
-    ] =
-      meeting.startTime
-        .toISOString()
-        .split('T')[1]
-        .split(':')
-        .map(Number);
-
-    const dateStr =
-      String(
-        meeting.startTime
-          .toISOString()
-          .split('T')[0],
-      );
-
-    const [
-      year,
-      month,
-      day,
-    ] =
-      dateStr
-        .split('-')
-        .map(Number);
-
-    const date =
-      new Date(
-        year,
-        month - 1,
-        day,
-        hours,
-        minutes,
-        0,
-        0,
-      );
-
-    return date;
+    return new Date(
+      meeting.startTime,
+    );
   }
 
   @Cron('*/5 * * * *')
-
   async handleCron() {
 
-    console.log(
+    this.logger.log(
       'Checking reminders...',
     );
   }

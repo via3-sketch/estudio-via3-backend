@@ -207,7 +207,8 @@ export class MeetingsService {
       meetLink: googleData.meetLink,
       googleEventId: googleData.googleEventId,
       status: MeetingStatus.CONFIRMED,
-      reminderSent: false,
+      reminder24hSent: false,
+      reminder2hSent: false,
     });
 
     request.status = RequestStatus.SCHEDULED;

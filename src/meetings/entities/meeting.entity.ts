@@ -15,7 +15,6 @@ import { Users } from 'src/users/entities/user.entity';
 
 @Entity('MEETINGS')
 export class Meetings {
-
   @PrimaryGeneratedColumn('uuid')
   id!: string;
 
@@ -25,12 +24,12 @@ export class Meetings {
   topic!: string;
 
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
   })
   startTime!: Date;
 
   @Column({
-    type: 'timestamp',
+    type: 'timestamptz',
   })
   endTime!: Date;
 
@@ -51,11 +50,6 @@ export class Meetings {
     default: MeetingStatus.PENDING,
   })
   status!: MeetingStatus;
-
-  @Column({
-    default: false,
-  })
-  reminderSent!: boolean;
 
   @CreateDateColumn()
   createdAt!: Date;

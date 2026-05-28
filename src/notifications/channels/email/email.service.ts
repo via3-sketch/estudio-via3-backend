@@ -195,6 +195,104 @@ export class EmailService {
     );
   }
 
+  //
+  async sendMeetingReminder24h(
+  email: string,
+
+  meetingData: {
+    name: string;
+    day: string;
+    date: string;
+    time: string;
+    meetLink: string;
+    year: number;
+  },
+) {
+
+  const html =
+    this.compileTemplate(
+      'meeting-reminder-24h',
+      {
+        name:
+          meetingData.name,
+
+        day:
+          meetingData.day,
+
+        date:
+          meetingData.date,
+
+        time:
+          meetingData.time,
+
+        meetLink:
+          meetingData.meetLink,
+
+        platformUrl:
+          process.env.PLATFORM_URL ??
+          'https://estudio-via3-frontend.vercel.app/',
+
+        year:
+          meetingData.year,
+      },
+    );
+
+  await this.sendEmail(
+    email,
+    'Recordatorio: tu reunión es mañana',
+    html,
+  );
+}
+
+async sendMeetingReminder2h(
+  email: string,
+
+  meetingData: {
+    name: string;
+    day: string;
+    date: string;
+    time: string;
+    meetLink: string;
+    year: number;
+  },
+) {
+
+  const html =
+    this.compileTemplate(
+      'meeting-reminder-2h',
+      {
+        name:
+          meetingData.name,
+
+        day:
+          meetingData.day,
+
+        date:
+          meetingData.date,
+
+        time:
+          meetingData.time,
+
+        meetLink:
+          meetingData.meetLink,
+
+        platformUrl:
+          process.env.PLATFORM_URL ??
+          'https://estudio-via3-frontend.vercel.app/',
+
+        year:
+          meetingData.year,
+      },
+    );
+
+  await this.sendEmail(
+    email,
+    'Recordatorio: tu reunión es en 2 horas',
+    html,
+  );
+}
+
+
   async sendMeetingCreated(
     email: string,
     companyName: string,
@@ -534,77 +632,6 @@ export class EmailService {
     );
   }
 
-  async sendMeetingReminder24h(
-    email: string,
-    companyName: string,
-    meetingDate: string,
-    meetingTime: string,
-    meetingLink: string,
-  ) {
-
-    const html =
-      this.compileTemplate(
-        'meeting-reminder-24h',
-        {
-          companyName,
-
-          meetingDate,
-
-          meetingTime,
-
-          meetingLink,
-
-          platformUrl:
-            process.env.PLATFORM_URL ??
-            'https://estudio-via3-frontend.vercel.app/',
-
-          year:
-            new Date().getFullYear(),
-        },
-      );
-
-    await this.sendEmail(
-      email,
-      'Recordatorio: tu reunión es mañana',
-      html,
-    );
-  }
-
-  async sendMeetingReminder2h(
-    email: string,
-    companyName: string,
-    meetingDate: string,
-    meetingTime: string,
-    meetingLink: string,
-  ) {
-
-    const html =
-      this.compileTemplate(
-        'meeting-reminder-2h',
-        {
-          companyName,
-
-          meetingDate,
-
-          meetingTime,
-
-          meetingLink,
-
-          platformUrl:
-            process.env.PLATFORM_URL ??
-            'https://estudio-via3-frontend.vercel.app/',
-
-          year:
-            new Date().getFullYear(),
-        },
-      );
-
-    await this.sendEmail(
-      email,
-      'Recordatorio: tu reunión es en 2 horas',
-      html,
-    );
-  }
 
   async sendPasswordRecoveryEmail(
     email: string,

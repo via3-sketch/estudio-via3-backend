@@ -44,7 +44,9 @@ export class AvailabilityService {
     }
 
     // Pasamos el timezone para generar slots en hora local
-    const slots = generateDaySlots(targetDate, timezone);
+    const slots = generateDaySlots(
+  targetDate,
+);
 
     const meetings = await this.meetingRepository.find({
       where: { status: Not(MeetingStatus.CANCELLED) },

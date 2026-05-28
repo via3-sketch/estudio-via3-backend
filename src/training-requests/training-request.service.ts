@@ -23,15 +23,29 @@ import { NotificationsService } from 'src/notifications/notifications.service';
 import { NotificationType } from 'src/notifications/enums/notification-type.enum';
 import { NotificationsGateway } from 'src/notifications/gateways/notifications.gateway';
 
+// Para que Meetings no tenga dependencia circular con TrainingRequests, se importa solo el repositorio y no la entidad
+import { Meetings } from 'src/meetings/entities/meeting.entity';
+import { MeetingStatus } from 'src/meetings/entities/meetingStatus.entity';
+import { GoogleMeetService } from 'src/meetings/services/google-meet.service';
+
 @Injectable()
 export class TrainingRequestService {
   constructor(
     private readonly repository: TrainingRequestRepository,
-    @InjectRepository(Users)
-    private readonly usersRepository: Repository<Users>,
-    private readonly emailService: EmailService,
-    private readonly notificationsService: NotificationsService,
-    private readonly notificationsGateway: NotificationsGateway,
+
+  @InjectRepository(Users)
+  private readonly usersRepository: Repository<Users>,
+
+  @InjectRepository(Meetings)
+  private readonly meetingsRepository: Repository<Meetings>,
+
+  private readonly emailService: EmailService,
+
+  private readonly notificationsService: NotificationsService,
+
+  private readonly notificationsGateway: NotificationsGateway,
+
+  private readonly googleMeetService: GoogleMeetService,
   ) {}
 
   async create(
@@ -168,43 +182,102 @@ export class TrainingRequestService {
     return updatedRequest;
   }
 
+  
+
+
+
+
   async updateStatus(
-    id: string,
-    newStatus: RequestStatus,
-  ): Promise<TrainingRequests> {
-    const request = await this.findOne(id);
+  id: string,
+  newStatus: RequestStatus,
+): Promise<TrainingRequests> {
+  const request = await this.findOne(id);
 
-    if (request.status === RequestStatus.CANCELLED) {
-      throw new BadRequestException(
-        'No se puede modificar una solicitud cancelada.',
-      );
-    }
+  if (request.status === RequestStatus.CANCELLED) {
+    throw new BadRequestException(
+      'No se puede modificar una solicitud cancelada.',
+    );
+  }
 
-    if (
-      request.status === RequestStatus.SCHEDULED &&
-      newStatus !== RequestStatus.CANCELLED &&
-      newStatus !== RequestStatus.AWAITING_PAYMENT
-    ) {
-      throw new BadRequestException('La capacitación ya está agendada.');
-    }
+  if (
+    request.status === RequestStatus.SCHEDULED &&
+    newStatus !== RequestStatus.CANCELLED &&
+    newStatus !== RequestStatus.AWAITING_PAYMENT
+  ) {
+    throw new BadRequestException(
+      'La capacitación ya está agendada.',
+    );
+  }
 
-    if (
-      newStatus === RequestStatus.PENDING &&
-      request.status !== RequestStatus.PENDING
-    ) {
-      throw new BadRequestException('No puede volver a pendiente.');
-    }
+  if (
+    newStatus === RequestStatus.PENDING &&
+    request.status !== RequestStatus.PENDING
+  ) {
+    throw new BadRequestException(
+      'No puede volver a pendiente.',
+    );
+  }
 
-    request.status = newStatus;
+  request.status = newStatus;
 
-    const updatedRequest = await this.repository.saveRequest(request);
-
-    this.sendStatusNotifications(updatedRequest, newStatus).catch((err) =>
-      console.error('Error enviando notificaciones:', err),
+  const updatedRequest =
+    await this.repository.saveRequest(
+      request,
     );
 
-    return updatedRequest;
+  if (
+    newStatus === RequestStatus.CANCELLED
+  ) {
+    const meetings =
+      await this.meetingsRepository.find({
+        where: {
+          trainingRequest: {
+            id: request.id,
+          },
+
+          status:
+            MeetingStatus.CONFIRMED,
+        },
+
+        relations: [
+          'trainingRequest',
+        ],
+      });
+
+    for (const meeting of meetings) {
+      if (meeting.googleEventId) {
+        await this.googleMeetService.deleteEvent(
+          meeting.googleEventId,
+        );
+      }
+
+      meeting.status =
+        MeetingStatus.CANCELLED;
+
+      await this.meetingsRepository.save(
+        meeting,
+      );
+    }
   }
+
+  this.sendStatusNotifications(
+    updatedRequest,
+    newStatus,
+  ).catch((err) =>
+    console.error(
+      'Error enviando notificaciones:',
+      err,
+    ),
+  );
+
+  return updatedRequest;
+}
+
+
+
+
+
+
 
   async remove(
     id: string,
